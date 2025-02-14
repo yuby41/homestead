@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PredictionController;
+use App\Http\Controllers\GameController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,3 +18,7 @@ Route::get('/upload', function () {
 
 // Ruta para procesar la imagen
 Route::post('/upload', [PredictionController::class, 'uploadAndPredict'])->name('upload.image');
+
+Route::post('/process-file', [GameController::class, 'processTextFile'])->name('process.file');
+
+

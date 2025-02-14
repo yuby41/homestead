@@ -11,11 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('games', function (Blueprint $table) {
-            $table->float('over_0_5_prob', 8, 2)->nullable()->change();
-            $table->float('under_0_5_prob', 8, 2)->nullable()->change();
-            $table->float('odds', 8, 2)->nullable()->change();
-        });
+        //
     }
 
     /**
@@ -23,6 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('games');
+        //
     }
 };
