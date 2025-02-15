@@ -15,20 +15,25 @@ class ApiFootballService
         $this->baseUrl = env('API_FOOTBALL_URL', 'https://v3.football.api-sports.io/');
     }
 
-    public function request($endpoint, $params = [])
+    public function request($endpoint, $params = [], $cacheTime = 3600)
     {
-        $response = Http::withHeaders([
-            'x-apisports-key' => $this->apiKey,
-            'Accept' => 'application/json',
-        ])->get("{$this->baseUrl}{$endpoint}", $params);
+        $cacheKey = md5($endpoint . json_encode($params));
 
-        if ($response->failed()) {
-            return ['error' => true, 'message' => $response->body()];
-        }
+        return Cache::remember($cacheKey, $cacheTime, function () use ($endpoint, $params) {
+            $response = Http::withHeaders([
+                'x-apisports-key' => $this->apiKey,
+                'Accept' => 'application/json',
+            ])->get("{$this->baseUrl}{$endpoint}", $params);
 
-        return $response->json();
+            return $response->successful() ? $response->json() : ['error' => true, 'message' => $response->body()];
+        });
     }
 
+    public function clearCache($endpoint, $params = [])
+    {
+        $cacheKey = md5($endpoint . json_encode($params));
+        Cache::forget($cacheKey);
+    }
     // Obtener partidos en vivo
     public function getLiveMatches()
     {
