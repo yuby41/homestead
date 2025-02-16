@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class ApiFootballService
 {
@@ -38,5 +39,14 @@ class ApiFootballService
     public function getLiveMatches()
     {
         return $this->request('fixtures', ['live' => 'all']);
+    }
+
+    public function getTeamStatistics($league_id, $season, $team_id)
+    {
+        return $this->request('teams/statistics', [
+            'league' => $league_id,
+            'season' => $season,
+            'team' => $team_id
+        ]);
     }
 }

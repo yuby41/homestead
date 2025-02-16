@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\ApiFootballService;
+use App\Models\Statistic;
 use App\Models\League;
 use App\Models\Team;
 use App\Models\Game;
@@ -94,5 +95,33 @@ class FootballController extends Controller
         }
     
         return response()->json(['message' => 'Partidos guardados con éxito']);
+    }
+
+    public function storeStatistics($league_id, $season, $team_id)
+    {
+        $data = $this->apiFootballService->getTeamStatistics($league_id, $season, $team_id);
+
+        if (!isset($data['response']) || empty($data['response'])) {
+            return response()->json(['error' => 'No se encontraron estadísticas para este equipo'], 404);
+        }
+
+        $stats = $data['response'];
+
+        Statistic::updateOrCreate(
+            ['team_id' => $team_id, 'league_id' => $league_id, 'season' => $season],
+            [
+                'matches_played' => $stats['fixtures']['played']['total'] ?? 0,
+                'wins' => $stats['fixtures']['wins']['total'] ?? 0,
+                'draws' => $stats['fixtures']['draws']['total'] ?? 0,
+                'losses' => $stats['fixtures']['loses']['total'] ?? 0,
+                'goals_scored' => $stats['goals']['for']['total'] ?? 0,
+                'goals_conceded' => $stats['goals']['against']['total'] ?? 0,
+                'clean_sheets' => $stats['clean_sheet']['total'] ?? 0,
+                'yellow_cards' => $stats['cards']['yellow']['total'] ?? 0,
+                'red_cards' => $stats['cards']['red']['total'] ?? 0
+            ]
+        );
+
+        return response()->json(['message' => 'Estadísticas guardadas correctamente']);
     }
 }
