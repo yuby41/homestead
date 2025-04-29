@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\ApiFootballService;
+use App\Services\DataExportService;
 use App\Models\Statistic;
 use App\Models\League;
 use App\Models\Team;
@@ -124,4 +125,74 @@ class FootballController extends Controller
 
         return response()->json(['message' => 'Estadísticas guardadas correctamente']);
     }
+
+    public function exportManualMatchesToCSV(DataExportService $dataExportService)
+   {
+       $dataExportService->exportManualMatches();
+       return response()->json(['message' => 'Datos exportados con éxito', 'file' => storage_path('app/data/manual_matches.csv')]);
+   }
+
+   public function predictMatch(Request $request)
+    {
+        $request->validate([
+            'home_odds' => 'required|numeric',
+            'away_odds' => 'required|numeric',
+            'draw_odds' => 'required|numeric'
+        ]);
+    
+        return response()->json($this->apiFootballService->getPrediction(
+            $request->home_odds,
+            $request->away_odds,
+            $request->draw_odds
+        ));
+    }
+
+    public function showPredictForm()
+   {
+       return view('predict');
+   }
+   
+   public function processPrediction(Request $request)
+   {
+       $request->validate([
+           'home_odds' => 'required|numeric',
+           'away_odds' => 'required|numeric',
+           'draw_odds' => 'required|numeric'
+       ]);
+   
+       $prediction = $this->apiFootballService->getPrediction(
+           $request->home_odds,
+           $request->away_odds,
+           $request->draw_odds
+       );
+   
+       return view('predict', ['prediction' => $prediction]);
+   }
+
+   public function fetchUpcomingMatches($league_id, $season)
+    {
+        $matches = $this->apiFootballService->getUpcomingMatches($league_id, $season);
+        
+        if (isset($matches['response'])) {
+            return response()->json($matches['response']);
+        }
+    
+        return response()->json(['error' => 'No se encontraron partidos'], 404);
+    }
+
+    public function predictUpcomingMatches($league_id, $season)
+    {
+        $matches = $this->apiFootballService->getUpcomingMatches($league_id, $season);
+
+        // 🚀 Depuración: Guardar la respuesta de la API en los logs
+        \Log::info("Partidos recibidos de la API:", $matches);
+    
+        if (!isset($matches['response']) || empty($matches['response'])) {
+            \Log::warning("⚠️ No se encontraron partidos para la liga {$league_id} y la temporada {$season}");
+            return response()->json(['error' => 'No se encontraron partidos'], 404);
+        }
+    
+        return response()->json($matches); // Devuelve los partidos directamente para ver si existen
+    }
+    
 }

@@ -4,14 +4,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import pickle
 
-# Cargar los datos desde el CSV
-data = pd.read_csv('../storage/app/data/matches.csv')
+# Cargar los datos desde el CSV exportado de Laravel
+data = pd.read_csv('../storage/app/private/data/manual_matches.csv')
 
-# Preprocesar los datos
-data = data.dropna()  # Eliminar filas con datos faltantes
+# Preprocesar los datos (eliminar filas con datos faltantes)
+data = data.dropna()
 
 # Definir características (X) y variable objetivo (y)
-X = data[['home_team_id', 'away_team_id', 'home_score', 'away_score']]
+X = data[['home_odds', 'away_odds', 'draw_odds']]
 y = np.where(data['home_score'] > data['away_score'], 1, 0)  # 1 = gana local, 0 = pierde/empate
 
 # Dividir en conjunto de entrenamiento y prueba

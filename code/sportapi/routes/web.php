@@ -24,3 +24,11 @@ Route::post('/import-manual-matches', [ManualMatchController::class, 'importManu
 Route::get('/upload-csv', [ManualMatchController::class, 'showUploadForm'])->name('upload.csv');
 Route::post('/upload-csv', [ManualMatchController::class, 'importManualMatches'])->name('import.csv');
 
+Route::get('/export-manual-matches', [FootballController::class, 'exportManualMatchesToCSV']);
+Route::post('/predict-match', [FootballController::class, 'predictMatch']);
+
+Route::get('/predict', [FootballController::class, 'showPredictForm'])->name('predict.form');
+Route::post('/predict', [FootballController::class, 'processPrediction'])->name('predict.process');
+
+Route::get('/matches/{league_id}/{season}', [FootballController::class, 'fetchUpcomingMatches']);
+Route::get('/predict-matches/{league_id}/{season}', [FootballController::class, 'predictUpcomingMatches']);

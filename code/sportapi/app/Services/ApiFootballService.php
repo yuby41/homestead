@@ -30,23 +30,45 @@ class ApiFootballService
         });
     }
 
-    public function clearCache($endpoint, $params = [])
+    // 🚀 **Aquí definimos el método faltante**
+    public function getUpcomingMatches($league_id, $season)
     {
-        $cacheKey = md5($endpoint . json_encode($params));
-        Cache::forget($cacheKey);
-    }
-    // Obtener partidos en vivo
-    public function getLiveMatches()
-    {
-        return $this->request('fixtures', ['live' => 'all']);
-    }
-
-    public function getTeamStatistics($league_id, $season, $team_id)
-    {
-        return $this->request('teams/statistics', [
+        return $this->request('fixtures', [
             'league' => $league_id,
             'season' => $season,
-            'team' => $team_id
+            'status' => 'NS' // Solo partidos no iniciados
+        ]);
+
+        \Log::info("Respuesta API de partidos: ", $response);
+
+        return $response;
+    }
+
+    public function getPrediction($home_odds, $away_odds, $draw_odds)
+    {
+        $response = Http::post('http://127.0.0.1:5000/predict', [
+            'home_odds' => $home_odds,
+            'away_odds' => $away_odds,
+            'draw_odds' => $draw_odds
+        ]);
+    
+        return $response->json();
+    }
+
+    public function getLiveOdds($fixture_id)
+    {
+        return $this->request('odds/live', [
+            'fixture' => $fixture_id
         ]);
     }
+    
+    public function getPreMatchOdds($fixture_id, $bookmaker_id = 8)
+    {
+        return $this->request('odds', [
+            'fixture' => $fixture_id,
+            'bookmaker' => $bookmaker_id // ID del bookmaker (por defecto Bet365)
+        ]);
+    }
+
+
 }
